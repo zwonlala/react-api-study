@@ -1,68 +1,219 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Add 'axios'
 
-## Available Scripts
+**axios란?**
 
-In the project directory, you can run:
+_REST api를 요청할 때 promise 기반으로 처리할 수 있게 해주는 라이브러리_
 
-### `yarn start`
+<br>
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+> REST api란?
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+클라이언트와 서버가 소통하는 방식
 
-### `yarn test`
+<br>
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**axios 사용방법**
 
-### `yarn build`
+```javascript
+//사용자 정보 받아오는 경우
+import axios from "axios";
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+axios.get("/users/1");
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+//사용자 정보 등록하는 경우
+axios.post("/users", {
+  username: "sjw",
+  name: "jiwonSong",
+});
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+<br><br><br>
 
-### `yarn eject`
+### JSONPlaceholder
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+REST api 사용하는 방법 연습할때 [JSONPlaceholder](https://jsonplaceholder.typicode.com/)라는 사이트 사용하여 연습!!
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+다양한 연습용 api 제공!!
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+[posts](https://jsonplaceholder.typicode.com/posts), [comments](https://jsonplaceholder.typicode.com/comments), [albums](https://jsonplaceholder.typicode.com/albums) 등 다양한 연습용 api 제공
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+<br><br><br>
 
-## Learn More
+### 컴포넌트에서 데이터 받아오기!
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+> **`useState`** 와 **`useEffect`** 로 데이터 로딩하기
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+<br>
 
-### Code Splitting
+api를 요청할 때는 세가지 상태를 관리하는데,
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+**1. 요청의 결과**  
+**2. 로딩 상태**  
+**3. 에러**
 
-### Analyzing the Bundle Size
+이렇게 세가지 상태를 관리함!
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+<br>
 
-### Making a Progressive Web App
+위에서 말한 세가지 상태에 대해 **`useState`** Hook을 사용하여 이렇게 처리하고
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+```javascript
+//1.요청의 결과 상태 관리
+const [users, setUsers] = useState(null);
 
-### Advanced Configuration
+//2.로딩 상태 관리
+//loading 값은 현재 데이터를 로딩 중인지 아닌지 알려주는 값
+const [loading, setLoading] = useState(false);
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+//3.Error 상태 관리
+//에러가 발생하면 error에 값이 담길 것임!
+const [error, setError] = useState(null);
+```
 
-### Deployment
+<br><br>
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+그리고 컴포넌트가 처음 렌더링 될 때, **`axios`** 사용하여 api를 요청하도록 구현을 할 것임.
 
-### `yarn build` fails to minify
+그리고 이 것은 **`useEffect`** 을 사용하여 구현.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+```javascript
+useEffect(() => {
+  const fetchUsers = async () => {
+    //먼저 try-catch 문을 사용하여 axios를 실행하고 에러가 발생되면 catch문 사용
+    try {
+      setUsers(null);
+      setError(null); //user와 error 값을 초기화
+      setLoading(true); //loading이 시작되었음을 설정하기 위해 loading 값을 true로 설정
+
+      //REST api 요청
+      const response = await axios.get(
+        "https://jsonplaceholder.typicode.com/users/asdf"
+      );
+      //결과값 조회하기 위해서는 'response.data'값 조회하면 됨
+      //결과값을 users에 등록
+      setUsers(response.data);
+    } catch (e) {
+      //에러가 발생하면 발생한 e 값으로 Error 설정!
+      setError(e);
+      console.log(e.response.status);
+    }
+    //이 모든게 다 끝나면, 로딩이 끝났다고 다시 알려줘야 함!
+    setLoading(false);
+  };
+
+  //위에서 만든 fetchUsers 함수 호출해 줌!
+  fetchUsers();
+}, []);
+```
+
+<br><br>
+
+그 다음 위에서 설정한 세 상태에 따라 다른 화면을 렌더링 해줄 것임.
+
+만약 문제가 있을 경우(정상적인 결과가 나오지 않았을 경우),  
+아래처럼,
+
+- 로딩중이건,
+- 에러 처리 되었거나,
+- user가 정상적으로 오지 않았을 경우,
+
+다른 것들을 리턴하고,
+
+```javascript
+if (loading) return <div>로딩중...</div>;
+if (error) return <div>에러가 발생했습니다...</div>;
+if (!users) return null;
+```
+
+<br><br>
+
+위 경우가 아닌 정상적인 결과를 받은 경우는 우리가 원했던 내용을 출력해준다.
+
+```javascript
+//여기서부턴 user가 정상적으로 아무 문제 없이 온 상황!
+return (
+  <ul>
+    {users.map((user) => (
+      <li key={user.id}>
+        {user.username} ({user.name})
+      </li>
+    ))}
+  </ul>
+);
+```
+
+<br><br>
+
+<details>
+<summary> <b>+ 아래에 버튼을 두어 버튼을 누를 때 마다 api에서 불러오는 코드</b></summary>
+
+```javascript
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+function Users() {
+  //1.요청의 결과 상태 관리
+  const [users, setUsers] = useState(null);
+
+  //2.로딩 상태 관리
+  //loading 값은 현재 데이터를 로딩 중인지 아닌지 알려주는 값
+  const [loading, setLoading] = useState(false);
+
+  //3.Error 상태 관리
+  //에러가 발생하면 error에 값이 담길 것임!
+  const [error, setError] = useState(null);
+
+  const fetchUsers = async () => {
+    try {
+      setUsers(null);
+      setError(null); //user와 error 값을 초기화
+      setLoading(true);
+
+      const response = await axios.get(
+        "https://jsonplaceholder.typicode.com/users/"
+      );
+      //결과값 조회하기 위해서는 'response.data'값 조회하면 됨
+      setUsers(response.data);
+    } catch (e) {
+      //에러가 발생하면 발생한 e 값으로 Error 설정!
+      setError(e);
+      console.log(e.response.status);
+    }
+    //이 모든게 다 끝나면, 로딩이 끝났다고 다시 알려줘야 함!
+    setLoading(false);
+  };
+
+  //그리고 컴포넌트가 처음 렌더링 될 때, axios 사용하여 api를 요청하도록 useEffect 사용하여 구현
+  useEffect(() => {
+    //위에서 만든 fetchUsers 함수 호출해 줌!
+    fetchUsers();
+  }, []);
+
+  //이제는 세가지 상태에 따라 다른 결과물을 렌더링 할 것임!
+
+  if (loading) return <div>로딩중...</div>;
+  if (error) return <div>에러가 발생했습니다...</div>;
+  if (!users) return null;
+
+  //여기서부턴 user가 정상적으로 아무 문제 없이 온 상황!
+
+  return (
+    <>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>
+            {user.username} ({user.name})
+          </li>
+        ))}
+      </ul>
+      <button onClick={fetchUsers}>새로고침</button>
+    </>
+  );
+}
+
+export default Users;
+```
+
+</details>
+
+<br><br><br><br>
