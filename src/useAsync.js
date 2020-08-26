@@ -30,7 +30,8 @@ function reducer(state, action) {
 //deps : dependencies를 의미하는 deps 배열.
 //       나중에 useEffect를 사용했을때, 컴포넌트가 로딩됐을때나 어떤 값이 변경되었을때 사용할 값.
 //       기본값을 빈 배열(컴포넌트가 처음 렌더링 될때만 실행하겠다)
-function useAsync(callback, deps = []) {
+//skip : 처음 렌더링 될 때 정보를 불러올지, 말지 설정하는 값. 기본값은 false
+function useAsync(callback, deps = [], skip = false) {
   const [state, dispatch] = useReducer(reducer, {
     loading: false,
     data: null,
@@ -50,6 +51,11 @@ function useAsync(callback, deps = []) {
   }, [callback]);
 
   useEffect(() => {
+    //만약 skip이 true 이면, return 하여 아래 fetchData 함수가 시행되지 않음.
+    if (skip) {
+      return;
+    }
+
     fetchData();
     //만약 eslint를 적용했으면 밑에 deps 부분에서 워닝이 뜨는데, 그걸 비활성화 해주기 위해 아래 주석 작성함.
     //내 코드에서는 eslint 적용안해서 원래 워닝 발생안함.
